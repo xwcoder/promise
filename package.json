@@ -1,0 +1,25 @@
+{
+  "name": "promise",
+  "version": "0.1.0",
+  "description": "simple impletation of es6 promise",
+  "main": "promise.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xwcoder/promise.git"
+  },
+  "keywords": [
+    "promise"
+  ],
+  "author": "creep",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/xwcoder/promise/issues"
+  },
+  "homepage": "https://github.com/xwcoder/promise"
+}
