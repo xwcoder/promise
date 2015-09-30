@@ -102,7 +102,10 @@ Promise.prototype.catch = function (rejectCallback) {
 Promise.resolve = function (p) {
 
     if ( isPromise(p) ) {
-        return p;
+        //return p;
+        return new Promise(function (resolve, reject) {
+            p.then(resolve, reject);
+        });
     }
 
     return new Promise(function (resolve) {
@@ -112,7 +115,10 @@ Promise.resolve = function (p) {
 
 Promise.reject = function (p) {
     if ( isPromise(p) ) {
-        return p;
+        //return p;
+        return new Promise(function (resolve, reject) {
+            p.then(resolve, reject);
+        });
     }
 
     return new Promise(function (resolve, reject) {
