@@ -66,7 +66,14 @@ Promise.prototype.then = function (resolveCallback, rejectCallback) {
     return new Promise(function (resolve, reject) {
 
         var resolveCallbackWrap = function (value) {
-            var ret = resolveCallback ? resolveCallback(value) : value;
+
+            try {
+                var ret = resolveCallback ? resolveCallback(value) : value;
+            } catch (e) {
+                reject(new Error(e));
+                return;
+            }
+
             if ( isPromise(ret) ) {
                 ret.then(function (value) {
                     resolve(value);
@@ -77,8 +84,17 @@ Promise.prototype.then = function (resolveCallback, rejectCallback) {
         };
 
         var rejectCallbackWrap = function (value) {
-            var ret = rejectCallback ? rejectCallback(value) : value;
-            reject(ret);
+            if ( value instanceof Error && !rejectCallback ) { //冒泡异常
+                reject(value);
+            } else {
+                try {
+                    var ret = rejectCallback ? rejectCallback(value) : value;
+                } catch (e) {
+                    reject(new Error(e));
+                    return;
+                }
+                resolve();
+            }
         };
 
         if ( self.__status == RESOLVED ) {
@@ -92,11 +108,29 @@ Promise.prototype.then = function (resolveCallback, rejectCallback) {
     });
 };
 
-/**
- * catch方法需要考虑restore的情况，略复杂暂不考虑支持
- */
 Promise.prototype.catch = function (rejectCallback) {
-    return this.then(null, rejectCallback);
+
+    var self = this;
+    return new Promise(function (resolve, reject) {
+
+        var rejectCallbackWrap = function (value) {
+            if ( value instanceof Error ) {
+                var ret = rejectCallback ? rejectCallback(value) : value;
+                resolve(ret);
+            } else {
+                resolve(self.__value);
+            }
+        };
+
+        if ( self.__status == RESOLVED ) {
+            resolve(self.__value);
+        } else if ( self.__status == REJECTED ) {
+            rejectCallbackWrap(self.__value);
+        } else {
+            self.__resolveList.push(resolve);
+            self.__rejectList.push(rejectCallbackWrap);
+        }
+    });
 };
 
 Promise.resolve = function (p) {
@@ -187,7 +221,7 @@ if ( typeof window != 'undefined' && window.Promise ) {
     module.exports = window.Promise;
 } if ( typeof global != 'undefined' && global.Promise ) {
     module.exports = global.Promise;
-}else {
+} else {
     module.exports = Promise;
 }
 

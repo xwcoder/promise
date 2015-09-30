@@ -134,27 +134,102 @@ describe('then', function() {
       assert.equal(v, 1);
     });
   });
-});
 
-xdescribe('catch', function() {
-  xit('catch chain & restore', function () {
-    var p1 = new Promise(function(resolve, reject) {
-      resolve('1');
+  it('reject in middle', function () {
+    var p = new Promise(function (resolve, reject) {
+      reject(1);
     });
 
-    p1.then(function(v) {
+    p.then(function () {
+      assert.equal(0, 1);
+    }, function (v) {
       assert.equal(v, 1);
-      throw 'oh no!';
-    }).then(function () {
-      console.log(2);
+    }).then(function (v) {
+      assert.equal(typeof v, 'undefined');
     }, function () {
-      console.log('error cause reject');
+      assert.equal(1, 0);
+    });
+  });
+});
+
+
+describe('catch', function() {
+
+  it('catch chain & restore', function () {
+    var p1 = new Promise(function(resolve, reject) {
+      resolve('Success');
+    });
+
+    p1.then(function(value) {
+      console.log(value); // "Success!"
+      throw 'oh, no!';
     }).catch(function(e) {
       console.log(e); // "oh, no!"
     }).then(function(e){
       console.log('after a catch the chain is restored');
-    }, function () {
-      console.log('error chain');
+    });
+  });
+
+  it('catch after two', function () {
+    var p1 = new Promise(function(resolve, reject) {
+      resolve('Success');
+    });
+
+    p1.then(function(value) {
+      console.log(value); // "Success!"
+      throw 'oh, no!';
+    }).then(function () {
+      assert.equal(1, 0);
+    },function (e) {
+      console.log('reject after throw error');
+    }).catch(function(e) {
+      console.log(e); // "oh, no!"
+      assert.equal(1, 0);
+    }).then(function(e){
+      console.log('after a catch the chain is restored');
+    });
+  });
+
+  it('throw erro in reject callback', function () {
+    var p1 = new Promise(function(resolve, reject) {
+      reject('fail!');
+    });
+
+    p1.then(function(value) {
+      assert.equal(1, 0);
+      console.log(value);
+      throw 'oh, no!';
+    }, function (value) {
+      console.log(value); // "fail!"
+      throw 'oh, reject error';
+    }).then(function () {
+      assert.equal(1, 0);
+    },function (e) {
+      console.log('reject after throw error: ' + e);
+    }).catch(function(e) {
+      console.log(e); // "oh, no!"
+      assert(1, 0);
+    }).then(function(e){
+      console.log('after a catch the chain is restored');
+    });
+  });
+
+  it('throw erro in reject callback without handler', function () {
+    var p1 = new Promise(function(resolve, reject) {
+      reject('fail!');
+    });
+
+    p1.then(function(value) {
+
+    }, function (value) {
+      console.log(value); // "fail!"
+      throw 'oh, reject error';
+    }).then(function () {
+      assert.equal(1, 0);
+    }).catch(function(e) {
+      console.log(e); // "oh, no!"
+    }).then(function(e){
+      console.log('after a catch the chain is restored');
     });
   });
 });
