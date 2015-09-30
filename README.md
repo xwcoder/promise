@@ -6,7 +6,7 @@ API说明 [Promise](http://t.cn/8F5QRAc)
 
 ## 测试
 <pre>
-npm run
+npm test
 </pre>
 
 <pre>
