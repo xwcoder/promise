@@ -114,7 +114,7 @@ Promise.prototype.catch = function (rejectCallback) {
     return new Promise(function (resolve, reject) {
 
         var rejectCallbackWrap = function (value) {
-            if ( value instanceof Error ) {
+            if ( value instanceof Error ) { //catch只处理异常情况
                 var ret = rejectCallback ? rejectCallback(value) : value;
                 resolve(ret);
             } else {
