@@ -157,7 +157,7 @@ Promise.all = function (ps) {
 Promise.race = function (ps) {
 
     if ( !isArray(ps) ) {
-        throw 'arguments must be an array in Promise.all';
+        throw 'arguments must be an array in Promise.race';
     }
 
     return new Promise(function (resolve, reject) {
