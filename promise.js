@@ -7,7 +7,8 @@
 
 var PENDING = 'pending',
     RESOLVED = 'resolved',
-    REJECTED = 'rejected';
+    REJECTED = 'rejected',
+    ERROR_CODE = -10000;
 
 var isType = function ( type ) {
     return function ( obj ) {
@@ -70,7 +71,12 @@ Promise.prototype.then = function (resolveCallback, rejectCallback) {
             try {
                 var ret = resolveCallback ? resolveCallback(value) : value;
             } catch (e) {
-                reject(new Error(e));
+                if ( !(e instanceof Error) ) {
+                    e = new Error(e);
+                }
+                e._code = ERROR_CODE; //使用code简单标记，不再包装特定异常类型
+                reject(e);
+                //reject(new Error(e));
                 return;
             }
 
@@ -90,7 +96,12 @@ Promise.prototype.then = function (resolveCallback, rejectCallback) {
                 try {
                     var ret = rejectCallback ? rejectCallback(value) : value;
                 } catch (e) {
-                    reject(new Error(e));
+                    if ( !(e instanceof Error) ) {
+                        e = new Error(e);
+                    }
+                    e._code = ERROR_CODE;
+                    reject(e);
+                    //reject(new Error(e));
                     return;
                 }
                 resolve();
@@ -114,7 +125,7 @@ Promise.prototype.catch = function (rejectCallback) {
     return new Promise(function (resolve, reject) {
 
         var rejectCallbackWrap = function (value) {
-            if ( value instanceof Error ) { //catch只处理异常情况
+            if ( value instanceof Error && value._code == ERROR_CODE ) { //catch只处理异常情况
                 var ret = rejectCallback ? rejectCallback(value) : value;
                 resolve(ret);
             } else {
