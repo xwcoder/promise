@@ -10,15 +10,15 @@ var PENDING = 'pending',
     REJECTED = 'rejected',
     ERROR_CODE = -10000;
 
-var isType = function ( type ) {
-    return function ( obj ) {
-        return {}.toString.call( obj ) == '[object ' + type + ']';
+var isType = function (type) {
+    return function (obj) {
+        return {}.toString.call(obj) == '[object ' + type + ']';
     }
 };
 
-var isObject = isType( 'Object' );
-var isFunction = isType( 'Function' );
-var isArray = Array.isArray || isType( 'Array' );
+var isObject = isType('Object');
+var isFunction = isType('Function');
+var isArray = Array.isArray || isType('Array');
 
 function isPromise (p) {
     return isObject(p) && isFunction(p.then);
@@ -34,24 +34,24 @@ function Promise(fn) {
     var self = this;
 
     function resolve (value) {
-        if ( self.__status == PENDING ) {
+        if (self.__status == PENDING) {
             self.__status = RESOLVED;
             self.__value = value;
             var list = self.__resolveList,
                 cb;
-            while ( cb = list.shift() ) {
+            while (cb = list.shift()) {
                 cb(value);
             }
         }
     }
 
     function reject (value) {
-        if ( self.__status == PENDING ) {
+        if (self.__status == PENDING) {
             self.__status = REJECTED;
             self.__value = value;
             var list = self.__rejectList,
                 cb;
-            while ( cb = list.shift() ) {
+            while (cb = list.shift()) {
                 cb(value);
             }
         }
@@ -80,7 +80,7 @@ Promise.prototype.then = function (resolveCallback, rejectCallback) {
                 return;
             }
 
-            if ( isPromise(ret) ) {
+            if (isPromise(ret)) {
                 ret.then(function (value) {
                     resolve(value);
                 });
@@ -90,7 +90,7 @@ Promise.prototype.then = function (resolveCallback, rejectCallback) {
         };
 
         var rejectCallbackWrap = function (value) {
-            if ( value instanceof Error && !rejectCallback ) { //冒泡异常
+            if (value instanceof Error && !rejectCallback) { //冒泡异常
                 reject(value);
             } else {
                 try {
@@ -104,13 +104,13 @@ Promise.prototype.then = function (resolveCallback, rejectCallback) {
                     //reject(new Error(e));
                     return;
                 }
-                resolve();
+                resolve(ret);
             }
         };
 
-        if ( self.__status == RESOLVED ) {
+        if (self.__status == RESOLVED) {
             resolveCallbackWrap(self.__value);
-        } else if ( self.__status == REJECTED ) {
+        } else if (self.__status == REJECTED) {
             rejectCallbackWrap(self.__value);
         } else {
             self.__resolveList.push(resolveCallbackWrap);
